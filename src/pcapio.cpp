@@ -62,12 +62,14 @@ bool PCapIO::setDevice(int index)
 int PCapIO::broadcast(DataItemPtr frame)
 {
     string oldName = _deviceName;
+    int sendCount = 0;
     for(auto name: _allNames){
         if(setDevice(name)){
-            send(frame);
+            sendCount = send(frame) == 0;
         }
     }
     setDevice(oldName);
+    return sendCount;
 }
 
 int PCapIO::send(DataItemPtr frame)
@@ -90,6 +92,7 @@ bool PCapIO::startReceive(pcapio_callback callback, void* userdata)
            this->_isReceiving = false;
            return false;
        }
+       return true;
    });
    return true;
 }
