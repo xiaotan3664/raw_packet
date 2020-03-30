@@ -1,4 +1,5 @@
 #include<iostream>
+#include<winsock2.h>
 #include<windows.h>
 #include <ntddndis.h>
 #define BPF_MAJOR_VERSION

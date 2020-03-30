@@ -33,6 +33,7 @@ Thumbs.db
 *.res
 *.rc
 *.user
+*.user.*
 /.qmake.cache
 /.qmake.stash
 
