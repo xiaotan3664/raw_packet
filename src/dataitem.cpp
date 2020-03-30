@@ -1,3 +1,4 @@
+#include <string.h>
 #include "dataitem.h"
 #include "commonutils.h"
 
@@ -8,7 +9,9 @@ DataItemPtr makeDataItem(unsigned char* data, size_t len){
 
 DataItemPtr makeDataItemByStr(const std::string& hexStr, int base){
     auto item = makeDataItem();
-    item->fromString(hexStr, base);
+    int maxUnit = -1;
+    if(base==16) maxUnit = 2;
+    item->fromString(hexStr, base, maxUnit);
     return item;
 }
 
@@ -77,20 +80,24 @@ bool DataItem::fromHexString(const std::string& content)
     return payload_index;
 }
 
-bool DataItem::fromString(const std::string &content, int base)
+bool DataItem::fromString(const std::string &content, int base, int maxUnit)
 {
     auto payload = new unsigned char[content.size()];
     auto payload_index = 0;
     unsigned int value = 0;
     unsigned int v = 0;
+    int readLen = 0;
     for(auto ch: content){
-        auto v = char2num(ch);
-        if(v<0 || v>=base){
+        v = char2num(ch);
+        if(v>=0 && v<base) {
+            readLen++;
+            value = value*base+v;
+        }
+        if((v<0 || v>=base) || (maxUnit>0 && readLen==maxUnit)){
             payload[payload_index++] = value;
             value = 0;
             v = -1;
-        } else {
-            value = value*base+v;
+            readLen = 0;
         }
     }
     if(v>=0 && v<base){

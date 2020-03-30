@@ -7,7 +7,7 @@ struct DataItem {
     DataItem(unsigned char* data= nullptr, size_t len = 0):data(data), len(len), id(next_id++){}
     std::string toHexString(const char joinChar=' ');
     bool fromHexString(const std::string& content);
-    bool fromString(const std::string& content, int base = 10);
+    bool fromString(const std::string& content, int base, int maxSeg);
     ~DataItem();
     unsigned char* data;
     size_t len;

@@ -1,3 +1,4 @@
+#include <string.h>
 #include "commonutils.h"
 #include "frame_utils.h"
 #include "pcapio.h"

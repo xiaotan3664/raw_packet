@@ -1,9 +1,19 @@
 #include<iostream>
+#include<string.h>
+
+#ifdef WIN32
 #include<winsock2.h>
 #include<windows.h>
 #include <ntddndis.h>
 #define BPF_MAJOR_VERSION
 #include <Packet32.h>
+#else
+#include <netinet/in.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#endif
+
 #include "pcapio.h"
 using std::string;
 using std::cout;
@@ -119,7 +129,11 @@ void PCapIO::findAllDevices()
       }
       for(auto d=allDevs; d!=nullptr; d=d->next){
           _allNames.push_back(d->name);
-          _allDescs.push_back(d->description);
+          if(d->description){
+              _allDescs.push_back(d->description);
+          } else {
+              _allDescs.push_back("");
+          }
       }
       pcap_freealldevs(allDevs);
 }
@@ -160,6 +174,7 @@ void PCapIO::pcap_callback(u_char * param, const pcap_pkthdr *hdr, const u_char 
     pcapIO->setReceived(data, hdr->caplen);
 }
 
+#ifdef WIN32
 int getAdapterMacAddr(const char* lpszAdapterName, unsigned char* ucMacAddr)
 {
     int result = -1;
@@ -192,7 +207,27 @@ int getAdapterMacAddr(const char* lpszAdapterName, unsigned char* ucMacAddr)
     PacketCloseAdapter(lpAdapter);
     return result;
 }
+#else
+int getAdapterMacAddr(const char* lpszAdapterName, unsigned char* ucMacAddr)
+{
+    int sockfd;
+    struct sockaddr_in sin;
+    struct ifreq ifr;
+    unsigned char mac[6];
 
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) {
+        return -1;
+    }
+    strncpy(ifr.ifr_name, lpszAdapterName, IFNAMSIZ); //Interface name
+    if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) == 0)
+    { //SIOCGIFHWADDR 获取hardware address
+        memcpy(ucMacAddr, ifr.ifr_hwaddr.sa_data, 6);
+        return 6;
+    }
+    return -1;
+}
+#endif
 int getAdapterIPAddr(const char *name, unsigned char* addr){
       pcap_if_t* allDevs;
       char errBuf[PCAP_ERRBUF_SIZE];

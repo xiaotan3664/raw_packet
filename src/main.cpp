@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
     if(cmd == "send"){
         if(argc<4) return -1;
         int deviceId = atoi(argv[2]);
-        pcap.setDevice(deviceId);
         string frameStr = argv[3];
         DataItemPtr frame = makeDataItemByStr(frameStr);
+        if(!pcap.setDevice(deviceId)) return -1;
         return pcap.send(frame);
     }
     if(cmd == "wol"){
